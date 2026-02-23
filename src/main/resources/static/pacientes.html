@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltMed – Pacientes</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="nav-root"></div>
+
+  <div class="main-content">
+    <div id="header-root"></div>
+
+    <main class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Gestión de Pacientes</span>
+          <button class="btn btn-primary" id="btn-nuevo-paciente">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo paciente
+          </button>
+        </div>
+
+        <!-- Filter -->
+        <div style="margin-bottom:1rem;">
+          <input type="text" id="filter-nombre" class="form-control" placeholder="Buscar paciente por nombre…" style="max-width:320px;" />
+        </div>
+
+        <div id="alert-pacientes"></div>
+
+        <div class="table-wrapper" style="position:relative;">
+          <div class="loading-overlay" id="pacientes-loading">
+            <div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;"></div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Documento</th>
+                <th style="text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="pacientes-tbody">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray-500);">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pacientes-pagination"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ Modal: Registrar / Editar paciente ══ -->
+<div class="modal-overlay" id="modal-paciente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-paciente-title">Registrar paciente</span>
+      <button class="modal-close" onclick="closeModal('modal-paciente')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-form-paciente"></div>
+      <form id="form-paciente" novalidate>
+        <input type="hidden" id="paciente-id" />
+        <div class="form-section-title">Datos personales</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre completo *</label>
+            <input type="text" id="p-nombre" class="form-control" required placeholder="María García" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" id="p-email" class="form-control" required placeholder="mail@ejemplo.com" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Teléfono *</label>
+            <input type="tel" id="p-telefono" class="form-control" required placeholder="+54 11 1234-5678" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Documento (7-9 dígitos) *</label>
+            <input type="text" id="p-documento" class="form-control" required placeholder="12345678" maxlength="9" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Dirección</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Calle *</label>
+            <input type="text" id="p-calle" class="form-control" required placeholder="Av. Rivadavia" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Número</label>
+            <input type="text" id="p-numero" class="form-control" placeholder="2500" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Barrio *</label>
+            <input type="text" id="p-barrio" class="form-control" required placeholder="Flores" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Complemento</label>
+            <input type="text" id="p-complemento" class="form-control" placeholder="Depto 4A" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Código postal *</label>
+            <input type="text" id="p-cp" class="form-control" required placeholder="1406000" maxlength="9" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad *</label>
+            <input type="text" id="p-ciudad" class="form-control" required placeholder="Buenos Aires" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado / Provincia *</label>
+          <input type="text" id="p-estado" class="form-control" required placeholder="CABA" />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-paciente')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-paciente">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Detalle paciente ══ -->
+<div class="modal-overlay" id="modal-detalle-paciente">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <span class="modal-title">Detalle del paciente</span>
+      <button class="modal-close" onclick="closeModal('modal-detalle-paciente')">&times;</button>
+    </div>
+    <div class="modal-body" id="detalle-paciente-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-detalle-paciente')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Confirmar baja ══ -->
+<div class="modal-overlay" id="modal-baja-paciente">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Dar de baja paciente</span>
+      <button class="modal-close" onclick="closeModal('modal-baja-paciente')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p style="font-size:.95rem;color:var(--gray-700);">¿Confirma dar de baja al paciente <strong id="baja-paciente-nombre"></strong>?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-baja-paciente')">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-baja-paciente">Dar de baja</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (!Auth.requireAuth()) throw new Error();
+
+  document.getElementById('nav-root').innerHTML    = renderNav('pacientes');
+  document.getElementById('header-root').innerHTML = renderHeader('Pacientes');
+  renderUserInfo();
+  initSidebar();
+
+  let currentPage  = 0;
+  let totalPages   = 0;
+  let editingId    = null;
+  let bajaId       = null;
+  let allPacientes = [];
+
+  /* ── Load ── */
+  async function loadPacientes(page = 0) {
+    const loading = document.getElementById('pacientes-loading');
+    loading.classList.add('active');
+    try {
+      const res    = await PacientesAPI.listar(page, 10);
+      allPacientes = res?.content || [];
+      totalPages   = res?.totalPages || 1;
+      currentPage  = page;
+      renderTable(filterList(allPacientes));
+      renderPagination();
+    } catch(e) {
+      document.getElementById('alert-pacientes').innerHTML =
+        `<div class="alert alert-danger">${e.message}</div>`;
+    } finally {
+      loading.classList.remove('active');
+    }
+  }
+
+  function filterList(list) {
+    const nombre = document.getElementById('filter-nombre').value.toLowerCase();
+    return list.filter(p => !nombre || p.nombre.toLowerCase().includes(nombre));
+  }
+
+  document.getElementById('filter-nombre').addEventListener('input', () => renderTable(filterList(allPacientes)));
+
+  function renderTable(list) {
+    const tbody = document.getElementById('pacientes-tbody');
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--gray-500);">No se encontraron pacientes.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(p => `
+      <tr>
+        <td><strong>${p.nombre}</strong></td>
+        <td>${p.email}</td>
+        <td>${p.telefono}</td>
+        <td>${p.documento_identidad ?? p.documento ?? '—'}</td>
+        <td style="text-align:center;">
+          <button class="btn btn-sm btn-secondary btn-icon" title="Ver detalle" onclick="verDetalle(${p.id})">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn btn-sm btn-warning btn-icon" title="Editar" onclick="editarPaciente(${p.id})">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-sm btn-danger btn-icon" title="Dar de baja" onclick="confirmBaja(${p.id},'${p.nombre.replace(/'/g,"\\'")}')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderPagination() {
+    const div = document.getElementById('pacientes-pagination');
+    if (totalPages <= 1) { div.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${currentPage===0?'disabled':''} onclick="loadPacientes(${currentPage-1})">&#8249;</button>`;
+    for (let i = 0; i < totalPages; i++)
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="loadPacientes(${i})">${i+1}</button>`;
+    html += `<button class="page-btn" ${currentPage===totalPages-1?'disabled':''} onclick="loadPacientes(${currentPage+1})">&#8250;</button>`;
+    div.innerHTML = html;
+  }
+
+  /* ── Ver detalle ── */
+  async function verDetalle(id) {
+    try {
+      const p = await PacientesAPI.obtener(id);
+      document.getElementById('detalle-paciente-body').innerHTML = `
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--primary);">${p.nombre[0]}</div>
+          <div><h3 style="margin:0;">${p.nombre}</h3><span class="badge badge-success">Activo</span></div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${p.email}</div></div>
+          <div class="detail-item"><div class="detail-label">Teléfono</div><div class="detail-value">${p.telefono}</div></div>
+          <div class="detail-item"><div class="detail-label">Documento</div><div class="detail-value">${p.documento_identidad ?? p.documento ?? '—'}</div></div>
+        </div>`;
+      openModal('modal-detalle-paciente');
+    } catch(e) { showToast(e.message, 'danger'); }
+  }
+
+  /* ── Nuevo / Editar ── */
+  document.getElementById('btn-nuevo-paciente').addEventListener('click', () => {
+    editingId = null;
+    document.getElementById('modal-paciente-title').textContent = 'Registrar paciente';
+    document.getElementById('form-paciente').reset();
+    document.getElementById('alert-form-paciente').innerHTML = '';
+    openModal('modal-paciente');
+  });
+
+  async function editarPaciente(id) {
+    try {
+      const p = await PacientesAPI.obtener(id);
+      editingId = id;
+      document.getElementById('modal-paciente-title').textContent = 'Editar paciente';
+      document.getElementById('paciente-id').value   = id;
+      document.getElementById('p-nombre').value      = p.nombre   || '';
+      document.getElementById('p-email').value       = p.email    || '';
+      document.getElementById('p-telefono').value    = p.telefono || '';
+      document.getElementById('p-documento').value   = p.documento_identidad ?? p.documento ?? '';
+      const dir = p.endereco || p.direccion || {};
+      document.getElementById('p-calle').value       = dir.logradouro || dir.calle       || '';
+      document.getElementById('p-numero').value      = dir.numero     || '';
+      document.getElementById('p-barrio').value      = dir.bairro     || dir.barrio      || '';
+      document.getElementById('p-complemento').value = dir.complemento|| '';
+      document.getElementById('p-cp').value          = dir.cep        || dir.codigo_postal || '';
+      document.getElementById('p-ciudad').value      = dir.cidade     || dir.ciudad      || '';
+      document.getElementById('p-estado').value      = dir.uf         || dir.estado      || '';
+      document.getElementById('alert-form-paciente').innerHTML = '';
+      openModal('modal-paciente');
+    } catch(e) { showToast(e.message, 'danger'); }
+  }
+
+  document.getElementById('btn-guardar-paciente').addEventListener('click', async () => {
+    const nombre    = document.getElementById('p-nombre').value.trim();
+    const email     = document.getElementById('p-email').value.trim();
+    const telefono  = document.getElementById('p-telefono').value.trim();
+    const documento_identidad = document.getElementById('p-documento').value.trim();
+
+    if (!nombre || !email || !telefono) {
+      document.getElementById('alert-form-paciente').innerHTML =
+        `<div class="alert alert-danger" style="margin-bottom:.75rem;">Complete los campos obligatorios.</div>`; return;
+    }
+
+    const direccion = {
+      calle:          document.getElementById('p-calle').value.trim(),
+      numero:         document.getElementById('p-numero').value.trim(),
+      complemento:    document.getElementById('p-complemento').value.trim(),
+      barrio:         document.getElementById('p-barrio').value.trim(),
+      codigo_postal:  document.getElementById('p-cp').value.trim(),
+      ciudad:         document.getElementById('p-ciudad').value.trim(),
+      estado:         document.getElementById('p-estado').value.trim()
+    };
+
+    const btn = document.getElementById('btn-guardar-paciente');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+    try {
+      if (editingId) {
+        await PacientesAPI.actualizar({ id: editingId, nombre, telefono, direccion });
+        showToast('Paciente actualizado', 'success');
+      } else {
+        await PacientesAPI.registrar({ nombre, email, telefono, documento_identidad, direccion });
+        showToast('Paciente registrado', 'success');
+      }
+      closeModal('modal-paciente');
+      loadPacientes(currentPage);
+    } catch(e) {
+      document.getElementById('alert-form-paciente').innerHTML =
+        `<div class="alert alert-danger" style="margin-bottom:.75rem;">${e.message}</div>`;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Guardar';
+    }
+  });
+
+  /* ── Baja ── */
+  function confirmBaja(id, nombre) {
+    bajaId = id;
+    document.getElementById('baja-paciente-nombre').textContent = nombre;
+    openModal('modal-baja-paciente');
+  }
+  document.getElementById('btn-confirmar-baja-paciente').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-confirmar-baja-paciente');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    try {
+      await PacientesAPI.eliminar(bajaId);
+      showToast('Paciente dado de baja', 'success');
+      closeModal('modal-baja-paciente');
+      loadPacientes(currentPage);
+    } catch(e) {
+      showToast(e.message, 'danger');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Dar de baja';
+    }
+  });
+
+  document.getElementById('search-input')?.addEventListener('input', e => {
+    document.getElementById('filter-nombre').value = e.target.value;
+    renderTable(filterList(allPacientes));
+  });
+
+  loadPacientes();
+</script>
+</body>
+</html>

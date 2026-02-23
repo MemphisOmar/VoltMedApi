@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltMed – Médicos</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="nav-root"></div>
+
+  <div class="main-content">
+    <div id="header-root"></div>
+
+    <main class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Gestión de Médicos</span>
+          <button class="btn btn-primary" id="btn-nuevo-medico">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo médico
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <input type="text" id="filter-nombre" class="form-control" placeholder="Buscar por nombre…" style="max-width:260px;" />
+          <select id="filter-especialidad" class="form-control" style="max-width:200px;">
+            <option value="">Todas las especialidades</option>
+            <option>ORTOPEDIA</option>
+            <option>CARDIOLOGIA</option>
+            <option>GINECOLOGIA</option>
+            <option>DERMATOLOGIA</option>
+          </select>
+        </div>
+
+        <div id="alert-medicos"></div>
+
+        <div class="table-wrapper" style="position:relative;">
+          <div class="loading-overlay" id="medicos-loading">
+            <div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;"></div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Documento</th>
+                <th style="text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="medicos-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray-500);">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="medicos-pagination"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ Modal: Registrar / Editar médico ══ -->
+<div class="modal-overlay" id="modal-medico">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-medico-title">Registrar médico</span>
+      <button class="modal-close" onclick="closeModal('modal-medico')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-form-medico"></div>
+      <form id="form-medico" novalidate>
+        <input type="hidden" id="medico-id" />
+        <div class="form-section-title">Datos personales</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre completo *</label>
+            <input type="text" id="m-nombre" class="form-control" required placeholder="Dr. Juan Pérez" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" id="m-email" class="form-control" required placeholder="doctor@hospital.com" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Teléfono *</label>
+            <input type="tel" id="m-telefono" class="form-control" required placeholder="+54 11 1234-5678" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Documento (7 dígitos) *</label>
+            <input type="text" id="m-documento" class="form-control" required placeholder="1234567" maxlength="7" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Especialidad *</label>
+          <select id="m-especialidad" class="form-control" required>
+            <option value="">— Seleccione —</option>
+            <option>ORTOPEDIA</option>
+            <option>CARDIOLOGIA</option>
+            <option>GINECOLOGIA</option>
+            <option>DERMATOLOGIA</option>
+          </select>
+        </div>
+
+        <div class="form-section-title">Dirección</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Calle *</label>
+            <input type="text" id="m-calle" class="form-control" required placeholder="Av. Corrientes" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Número</label>
+            <input type="text" id="m-numero" class="form-control" placeholder="1234" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Barrio *</label>
+            <input type="text" id="m-barrio" class="form-control" required placeholder="Centro" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Complemento</label>
+            <input type="text" id="m-complemento" class="form-control" placeholder="Piso 3, Depto B" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Código postal *</label>
+            <input type="text" id="m-cp" class="form-control" required placeholder="1000000" maxlength="9" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad *</label>
+            <input type="text" id="m-ciudad" class="form-control" required placeholder="Buenos Aires" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado / Provincia *</label>
+          <input type="text" id="m-estado" class="form-control" required placeholder="CABA" />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-medico')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-medico">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Detalle médico ══ -->
+<div class="modal-overlay" id="modal-detalle-medico">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <span class="modal-title">Detalle del médico</span>
+      <button class="modal-close" onclick="closeModal('modal-detalle-medico')">&times;</button>
+    </div>
+    <div class="modal-body" id="detalle-medico-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-detalle-medico')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Confirmar baja ══ -->
+<div class="modal-overlay" id="modal-baja-medico">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Dar de baja médico</span>
+      <button class="modal-close" onclick="closeModal('modal-baja-medico')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p style="font-size:.95rem;color:var(--gray-700);">¿Confirma dar de baja al médico <strong id="baja-medico-nombre"></strong>? La operación es lógica y el registro se conserva.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-baja-medico')">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-baja">Dar de baja</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (!Auth.requireAuth()) throw new Error();
+
+  document.getElementById('nav-root').innerHTML    = renderNav('medicos');
+  document.getElementById('header-root').innerHTML = renderHeader('Médicos');
+  renderUserInfo();
+  initSidebar();
+
+  let currentPage     = 0;
+  let totalPages      = 0;
+  let editingId       = null;
+  let bajaId          = null;
+  let allMedicos      = [];
+
+  /* ── Load list ── */
+  async function loadMedicos(page = 0) {
+    const loading = document.getElementById('medicos-loading');
+    loading.classList.add('active');
+    try {
+      const res = await MedicosAPI.listar(page, 10);
+      allMedicos  = res?.content || [];
+      totalPages  = res?.totalPages || 1;
+      currentPage = page;
+      renderTable(filterList(allMedicos));
+      renderPagination();
+    } catch(e) {
+      showAlert('alert-medicos', e.message, 'danger');
+    } finally {
+      loading.classList.remove('active');
+    }
+  }
+
+  function filterList(list) {
+    const nombre = document.getElementById('filter-nombre').value.toLowerCase();
+    const esp    = document.getElementById('filter-especialidad').value;
+    return list.filter(m =>
+      (!nombre || m.nombre.toLowerCase().includes(nombre)) &&
+      (!esp    || m.especialidad === esp)
+    );
+  }
+
+  document.getElementById('filter-nombre').addEventListener('input',       () => renderTable(filterList(allMedicos)));
+  document.getElementById('filter-especialidad').addEventListener('change', () => renderTable(filterList(allMedicos)));
+
+  function renderTable(list) {
+    const tbody = document.getElementById('medicos-tbody');
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--gray-500);">No se encontraron médicos.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(m => `
+      <tr>
+        <td><strong>${m.nombre}</strong></td>
+        <td><span class="badge badge-primary">${m.especialidad}</span></td>
+        <td>${m.email}</td>
+        <td>${m.telefono}</td>
+        <td>${m.crm ?? m.documento ?? '—'}</td>
+        <td style="text-align:center;">
+          <button class="btn btn-sm btn-secondary btn-icon" title="Ver detalle" onclick="verDetalle(${m.id})">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="btn btn-sm btn-warning btn-icon" title="Editar" onclick="editarMedico(${m.id})">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-sm btn-danger btn-icon" title="Dar de baja" onclick="confirmBaja(${m.id},'${m.nombre.replace(/'/g,"\\'")}')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderPagination() {
+    const div = document.getElementById('medicos-pagination');
+    if (totalPages <= 1) { div.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${currentPage===0?'disabled':''} onclick="loadMedicos(${currentPage-1})">&#8249;</button>`;
+    for (let i = 0; i < totalPages; i++)
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="loadMedicos(${i})">${i+1}</button>`;
+    html += `<button class="page-btn" ${currentPage===totalPages-1?'disabled':''} onclick="loadMedicos(${currentPage+1})">&#8250;</button>`;
+    div.innerHTML = html;
+  }
+
+  /* ── Ver detalle ── */
+  async function verDetalle(id) {
+    try {
+      const m = await MedicosAPI.obtener(id);
+      document.getElementById('detalle-medico-body').innerHTML = `
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--primary);">${m.nombre[0]}</div>
+          <div><h3 style="margin:0;">${m.nombre}</h3><span class="badge badge-primary">${m.especialidad}</span></div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${m.email}</div></div>
+          <div class="detail-item"><div class="detail-label">Teléfono</div><div class="detail-value">${m.telefono}</div></div>
+          <div class="detail-item"><div class="detail-label">Documento</div><div class="detail-value">${m.crm ?? m.documento ?? '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value"><span class="badge badge-success">Activo</span></div></div>
+        </div>
+        ${m.endereco || m.direccion ? `
+        <div class="form-section-title" style="margin-top:1rem;">Dirección</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-label">Calle</div><div class="detail-value">${(m.endereco||m.direccion)?.logradouro||(m.endereco||m.direccion)?.calle||'—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Ciudad</div><div class="detail-value">${(m.endereco||m.direccion)?.cidade||(m.endereco||m.direccion)?.ciudad||'—'}</div></div>
+        </div>` : ''}`;
+      openModal('modal-detalle-medico');
+    } catch(e) { showToast(e.message, 'danger'); }
+  }
+
+  /* ── Nuevo / Editar ── */
+  document.getElementById('btn-nuevo-medico').addEventListener('click', () => {
+    editingId = null;
+    document.getElementById('modal-medico-title').textContent = 'Registrar médico';
+    document.getElementById('form-medico').reset();
+    document.getElementById('medico-id').value = '';
+    document.getElementById('alert-form-medico').innerHTML = '';
+    // Enable all fields
+    ['m-email','m-documento','m-especialidad'].forEach(id => document.getElementById(id).disabled = false);
+    openModal('modal-medico');
+  });
+
+  async function editarMedico(id) {
+    try {
+      const m = await MedicosAPI.obtener(id);
+      editingId = id;
+      document.getElementById('modal-medico-title').textContent = 'Editar médico';
+      document.getElementById('medico-id').value  = id;
+      document.getElementById('m-nombre').value   = m.nombre   || '';
+      document.getElementById('m-email').value    = m.email    || '';
+      document.getElementById('m-telefono').value = m.telefono || '';
+      document.getElementById('m-documento').value= m.crm ?? m.documento ?? '';
+      document.getElementById('m-especialidad').value = m.especialidad || '';
+      // Address
+      const dir = m.endereco || m.direccion || {};
+      document.getElementById('m-calle').value      = dir.logradouro || dir.calle      || '';
+      document.getElementById('m-numero').value     = dir.numero     || '';
+      document.getElementById('m-barrio').value     = dir.bairro     || dir.barrio     || '';
+      document.getElementById('m-complemento').value= dir.complemento|| '';
+      document.getElementById('m-cp').value         = dir.cep        || dir.codigo_postal || '';
+      document.getElementById('m-ciudad').value     = dir.cidade     || dir.ciudad     || '';
+      document.getElementById('m-estado').value     = dir.uf         || dir.estado     || '';
+      document.getElementById('alert-form-medico').innerHTML = '';
+      openModal('modal-medico');
+    } catch(e) { showToast(e.message, 'danger'); }
+  }
+
+  document.getElementById('btn-guardar-medico').addEventListener('click', async () => {
+    const nombre      = document.getElementById('m-nombre').value.trim();
+    const email       = document.getElementById('m-email').value.trim();
+    const telefono    = document.getElementById('m-telefono').value.trim();
+    const documento   = document.getElementById('m-documento').value.trim();
+    const especialidad= document.getElementById('m-especialidad').value;
+
+    if (!nombre || !email || !telefono) {
+      showFormAlert('alert-form-medico', 'Complete los campos obligatorios.', 'danger'); return;
+    }
+
+    const direccion = {
+      calle:          document.getElementById('m-calle').value.trim(),
+      numero:         document.getElementById('m-numero').value.trim(),
+      complemento:    document.getElementById('m-complemento').value.trim(),
+      barrio:         document.getElementById('m-barrio').value.trim(),
+      codigo_postal:  document.getElementById('m-cp').value.trim(),
+      ciudad:         document.getElementById('m-ciudad').value.trim(),
+      estado:         document.getElementById('m-estado').value.trim()
+    };
+
+    const btn = document.getElementById('btn-guardar-medico');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+    try {
+      if (editingId) {
+        await MedicosAPI.actualizar({ id: editingId, nombre, telefono, direccion });
+        showToast('Médico actualizado correctamente', 'success');
+      } else {
+        await MedicosAPI.registrar({ nombre, email, telefono, documento, especialidad, direccion });
+        showToast('Médico registrado correctamente', 'success');
+      }
+      closeModal('modal-medico');
+      loadMedicos(currentPage);
+    } catch(e) {
+      showFormAlert('alert-form-medico', e.message, 'danger');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Guardar';
+    }
+  });
+
+  /* ── Baja ── */
+  function confirmBaja(id, nombre) {
+    bajaId = id;
+    document.getElementById('baja-medico-nombre').textContent = nombre;
+    openModal('modal-baja-medico');
+  }
+  document.getElementById('btn-confirmar-baja').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-confirmar-baja');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    try {
+      await MedicosAPI.eliminar(bajaId);
+      showToast('Médico dado de baja', 'success');
+      closeModal('modal-baja-medico');
+      loadMedicos(currentPage);
+    } catch(e) {
+      showToast(e.message, 'danger');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Dar de baja';
+    }
+  });
+
+  /* ── Helpers ── */
+  function showAlert(containerId, msg, type) {
+    document.getElementById(containerId).innerHTML =
+      `<div class="alert alert-${type}">${msg}</div>`;
+  }
+  function showFormAlert(containerId, msg, type) {
+    document.getElementById(containerId).innerHTML =
+      `<div class="alert alert-${type}" style="margin-bottom:.75rem;">${msg}</div>`;
+  }
+
+  // ─ Search header
+  document.getElementById('search-input')?.addEventListener('input', e => {
+    document.getElementById('filter-nombre').value = e.target.value;
+    renderTable(filterList(allMedicos));
+  });
+
+  loadMedicos();
+</script>
+</body>
+</html>

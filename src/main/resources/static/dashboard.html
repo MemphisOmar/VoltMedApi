@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltMed – Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="nav-root"></div>
+
+  <div class="main-content">
+    <div id="header-root"></div>
+
+    <main class="page-content">
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-medicos">—</div>
+            <div class="stat-label">Médicos activos</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-pacientes">—</div>
+            <div class="stat-label">Pacientes registrados</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-consultas">—</div>
+            <div class="stat-label">Consultas este mes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Especialidades</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;flex-wrap:wrap;">
+        <!-- Recent Doctors -->
+        <div class="card" style="min-width:0;">
+          <div class="card-header">
+            <span class="card-title">Médicos recientes</span>
+            <a href="#" class="btn btn-sm btn-secondary" id="link-all-medicos">Ver todos</a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Nombre</th><th>Especialidad</th><th>Email</th></tr></thead>
+              <tbody id="recent-medicos">
+                <tr><td colspan="3" class="empty-state" style="padding:1.5rem;text-align:center;color:var(--gray-500);">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Patients -->
+        <div class="card" style="min-width:0;">
+          <div class="card-header">
+            <span class="card-title">Pacientes recientes</span>
+            <a href="#" class="btn btn-sm btn-secondary" id="link-all-pacientes">Ver todos</a>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Nombre</th><th>Documento</th><th>Email</th></tr></thead>
+              <tbody id="recent-pacientes">
+                <tr><td colspan="3" class="empty-state" style="padding:1.5rem;text-align:center;color:var(--gray-500);">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card" style="margin-top:1.25rem;">
+        <div class="card-header"><span class="card-title">Acciones rápidas</span></div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="#" class="btn btn-primary" id="link-nuevo-medico">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo médico
+          </a>
+          <a href="#" class="btn btn-success" id="link-nuevo-paciente">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo paciente
+          </a>
+          <a href="#" class="btn btn-warning" id="link-reservar">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Reservar consulta
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (!Auth.requireAuth()) throw new Error();
+
+  // Set internal navigation links using APP_BASE
+  document.getElementById('link-all-medicos').href  = APP_BASE + '/medicos.html';
+  document.getElementById('link-all-pacientes').href = APP_BASE + '/pacientes.html';
+  document.getElementById('link-nuevo-medico').href  = APP_BASE + '/medicos.html';
+  document.getElementById('link-nuevo-paciente').href = APP_BASE + '/pacientes.html';
+  document.getElementById('link-reservar').href      = APP_BASE + '/consultas.html';
+
+  document.getElementById('nav-root').innerHTML    = renderNav('dashboard');
+  document.getElementById('header-root').innerHTML = renderHeader('Dashboard');
+  renderUserInfo();
+  initSidebar();
+
+  async function loadDashboard() {
+    try {
+      const [medPage, pacPage] = await Promise.all([
+        MedicosAPI.listar(0, 5),
+        PacientesAPI.listar(0, 5)
+      ]);
+
+      // Stats
+      document.getElementById('stat-medicos').textContent   = medPage?.totalElements ?? '—';
+      document.getElementById('stat-pacientes').textContent = pacPage?.totalElements ?? '—';
+      document.getElementById('stat-consultas').textContent = '—';
+
+      // Recent medicos table
+      const mBody = document.getElementById('recent-medicos');
+      const meds  = medPage?.content || [];
+      mBody.innerHTML = meds.length
+        ? meds.map(m => `<tr>
+            <td><strong>${m.nombre}</strong></td>
+            <td><span class="badge badge-primary">${m.especialidad}</span></td>
+            <td style="color:var(--gray-600)">${m.email}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="3" style="text-align:center;color:var(--gray-500);padding:1.5rem;">Sin datos</td></tr>`;
+
+      // Recent pacientes table
+      const pBody = document.getElementById('recent-pacientes');
+      const pacs  = pacPage?.content || [];
+      pBody.innerHTML = pacs.length
+        ? pacs.map(p => `<tr>
+            <td><strong>${p.nombre}</strong></td>
+            <td>${p.documento_identidad ?? p.documento ?? '—'}</td>
+            <td style="color:var(--gray-600)">${p.email}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="3" style="text-align:center;color:var(--gray-500);padding:1.5rem;">Sin datos</td></tr>`;
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

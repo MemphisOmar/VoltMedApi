@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltMed – Consultas</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="app-layout">
+  <div id="nav-root"></div>
+
+  <div class="main-content">
+    <div id="header-root"></div>
+
+    <main class="page-content">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="reservar">Reservar consulta</button>
+        <button class="tab-btn" data-tab="cancelar">Cancelar consulta</button>
+        <button class="tab-btn" data-tab="historial">Historial</button>
+      </div>
+
+      <!-- ── Tab: Reservar ── -->
+      <div class="tab-panel active" id="tab-reservar">
+        <div class="card" style="max-width:700px;">
+          <div class="card-header">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--primary)" stroke-width="2" style="vertical-align:middle;margin-right:.4rem;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Nueva consulta
+            </span>
+          </div>
+
+          <div id="alert-reservar"></div>
+
+          <form id="form-reservar" novalidate>
+            <div class="form-group">
+              <label class="form-label">Paciente *</label>
+              <select id="r-paciente" class="form-control" required>
+                <option value="">— Seleccione un paciente —</option>
+              </select>
+              <small style="color:var(--gray-500);font-size:.78rem;margin-top:.25rem;display:block;">Si no aparece, registre el paciente primero.</small>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Especialidad</label>
+                <select id="r-especialidad" class="form-control">
+                  <option value="">— Cualquier especialidad —</option>
+                  <option>ORTOPEDIA</option>
+                  <option>CARDIOLOGIA</option>
+                  <option>GINECOLOGIA</option>
+                  <option>DERMATOLOGIA</option>
+                </select>
+                <small style="color:var(--gray-500);font-size:.78rem;margin-top:.25rem;display:block;">Se asignará médico disponible automáticamente.</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Médico específico (opcional)</label>
+                <select id="r-medico" class="form-control">
+                  <option value="">— Sin preferencia —</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Fecha y hora *</label>
+              <input type="datetime-local" id="r-fecha" class="form-control" required />
+              <small style="color:var(--gray-500);font-size:.78rem;margin-top:.25rem;display:block;">El horario debe ser futuro, en días hábiles entre 07:00 y 19:00.</small>
+            </div>
+
+            <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+              <button type="submit" class="btn btn-primary" id="btn-reservar">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Confirmar reserva
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-limpiar-reservar">Limpiar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Confirmed card (hidden by default) -->
+        <div class="card" id="card-confirmado" style="max-width:700px;margin-top:1rem;display:none;border-left:4px solid var(--success);">
+          <div style="display:flex;align-items:center;gap:.75rem;color:var(--success);">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <strong style="font-size:1.05rem;">Consulta reservada exitosamente</strong>
+          </div>
+          <div class="detail-grid" style="margin-top:1rem;" id="confirmado-detalle"></div>
+        </div>
+      </div>
+
+      <!-- ── Tab: Cancelar ── -->
+      <div class="tab-panel" id="tab-cancelar">
+        <div class="card" style="max-width:600px;">
+          <div class="card-header">
+            <span class="card-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--danger)" stroke-width="2" style="vertical-align:middle;margin-right:.4rem;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Cancelar consulta
+            </span>
+          </div>
+
+          <div id="alert-cancelar"></div>
+
+          <form id="form-cancelar" novalidate>
+            <div class="form-group">
+              <label class="form-label">ID de la consulta *</label>
+              <input type="number" id="c-id" class="form-control" min="1" required placeholder="Ej: 42" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Motivo de cancelamiento *</label>
+              <select id="c-motivo" class="form-control" required>
+                <option value="">— Seleccione motivo —</option>
+                <option value="PACIENTE_DESISTIO">Paciente desistió</option>
+                <option value="MEDICO_CANCELO">Médico canceló</option>
+                <option value="OTROS">Otros</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-danger" id="btn-cancelar">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Cancelar consulta
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── Tab: Historial ── -->
+      <div class="tab-panel" id="tab-historial">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Historial de consultas</span>
+          </div>
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <p>El historial de consultas está disponible a través<br>de los reportes de la API.</p>
+            <a href="/dashboard.html" class="btn btn-secondary" style="margin-top:1rem;">Ir al dashboard</a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+  if (!Auth.requireAuth()) throw new Error();
+
+  document.getElementById('nav-root').innerHTML    = renderNav('consultas');
+  document.getElementById('header-root').innerHTML = renderHeader('Consultas');
+  renderUserInfo();
+  initSidebar();
+
+  /* ── Tabs ── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ── Load selects ── */
+  async function loadSelects() {
+    try {
+      const [medPage, pacPage] = await Promise.all([
+        MedicosAPI.listar(0, 100),
+        PacientesAPI.listar(0, 100)
+      ]);
+
+      const medSelect = document.getElementById('r-medico');
+      (medPage?.content || []).forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `${m.nombre} – ${m.especialidad}`;
+        medSelect.appendChild(opt);
+      });
+
+      const pacSelect = document.getElementById('r-paciente');
+      (pacPage?.content || []).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nombre} (doc: ${p.documento_identidad ?? p.documento ?? '—'})`;
+        pacSelect.appendChild(opt);
+      });
+    } catch(e) {
+      console.error('Error cargando selects:', e);
+    }
+  }
+
+  // Set minimum datetime for the date picker (now)
+  const dateInput = document.getElementById('r-fecha');
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  dateInput.min = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  /* ── Reservar ── */
+  document.getElementById('form-reservar').addEventListener('submit', async e => {
+    e.preventDefault();
+    const idPaciente   = Number(document.getElementById('r-paciente').value);
+    const idMedico     = Number(document.getElementById('r-medico').value) || null;
+    const especialidad = document.getElementById('r-especialidad').value  || null;
+    const fechaVal     = document.getElementById('r-fecha').value;
+
+    if (!idPaciente || !fechaVal) {
+      showFormAlert('alert-reservar', 'Seleccione paciente y fecha.', 'danger'); return;
+    }
+
+    // Convert to ISO string (LocalDateTime compatible)
+    const fecha = new Date(fechaVal).toISOString().replace('Z','').substring(0,19);
+
+    const btn = document.getElementById('btn-reservar');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Reservando…';
+    document.getElementById('alert-reservar').innerHTML = '';
+    document.getElementById('card-confirmado').style.display = 'none';
+
+    try {
+      const payload = { idPaciente, fecha };
+      if (idMedico)    payload.idMedico    = idMedico;
+      if (especialidad) payload.especialidad = especialidad;
+
+      const res = await ConsultasAPI.reservar(payload);
+      showToast('Consulta reservada exitosamente', 'success');
+
+      // Show confirmation card
+      document.getElementById('confirmado-detalle').innerHTML = `
+        <div class="detail-item"><div class="detail-label">ID Consulta</div><div class="detail-value">${res.id}</div></div>
+        <div class="detail-item"><div class="detail-label">Médico</div><div class="detail-value">${res.nomeMedico ?? res.nombreMedico ?? res.idMedico ?? '—'}</div></div>
+        <div class="detail-item"><div class="detail-label">Paciente</div><div class="detail-value">${res.nomePaciente ?? res.nombrePaciente ?? res.idPaciente ?? '—'}</div></div>
+        <div class="detail-item"><div class="detail-label">Fecha</div><div class="detail-value">${formatDateTime(res.data ?? res.fecha)}</div></div>`;
+      document.getElementById('card-confirmado').style.display = 'block';
+      document.getElementById('form-reservar').reset();
+    } catch(e) {
+      showFormAlert('alert-reservar', e.message, 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Confirmar reserva`;
+    }
+  });
+
+  document.getElementById('btn-limpiar-reservar').addEventListener('click', () => {
+    document.getElementById('form-reservar').reset();
+    document.getElementById('alert-reservar').innerHTML = '';
+    document.getElementById('card-confirmado').style.display = 'none';
+  });
+
+  /* ── Cancelar ── */
+  document.getElementById('form-cancelar').addEventListener('submit', async e => {
+    e.preventDefault();
+    const idConsulta = Number(document.getElementById('c-id').value);
+    const motivo     = document.getElementById('c-motivo').value;
+
+    if (!idConsulta || !motivo) {
+      showFormAlert('alert-cancelar', 'Complete todos los campos.', 'danger'); return;
+    }
+
+    const btn = document.getElementById('btn-cancelar');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Cancelando…';
+    document.getElementById('alert-cancelar').innerHTML = '';
+
+    try {
+      await ConsultasAPI.cancelar({ idConsulta, motivo });
+      showFormAlert('alert-cancelar', 'Consulta cancelada exitosamente.', 'success');
+      showToast('Consulta cancelada', 'success');
+      document.getElementById('form-cancelar').reset();
+    } catch(e) {
+      showFormAlert('alert-cancelar', e.message, 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Cancelar consulta`;
+    }
+  });
+
+  function showFormAlert(id, msg, type) {
+    document.getElementById(id).innerHTML =
+      `<div class="alert alert-${type}" style="margin-bottom:.75rem;">${msg}</div>`;
+  }
+
+  loadSelects();
+</script>
+</body>
+</html>
