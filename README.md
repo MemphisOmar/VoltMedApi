@@ -10,7 +10,11 @@
 
 ### Login
 <!-- Reemplaza la ruta con la imagen real, ej: docs/screenshots/login.png -->
-![Login – Pantalla de autenticación](docs/screenshots/login.png)
+<img width="1913" height="945" alt="image" src="https://github.com/user-attachments/assets/59275da6-7106-440e-9484-ee7e2470a4b7" />
+<img width="479" height="863" alt="image" src="https://github.com/user-attachments/assets/0628c753-c3a7-4752-9500-7043ecbbd923" />
+
+
+
 
 ---
 
