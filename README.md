@@ -4,8 +4,7 @@
 
 ---
 
-## �️ Capturas de Pantalla
-
+## FRONT-END
 > Las siguientes capturas muestran las principales vistas del frontend integrado en la aplicación.
 
 ### Login
@@ -19,29 +18,34 @@
 
 ### Dashboard
 <!-- Panel de control con estadísticas generales -->
-![Dashboard – Panel de control](docs/screenshots/dashboard.png)
+<img width="1916" height="946" alt="image" src="https://github.com/user-attachments/assets/9c891b1b-47b0-46c7-aa60-741aae7aa3ee" />
+
 
 ---
 
 ### Gestión de Médicos
 <!-- Listado, registro y edición de médicos -->
-![Médicos – CRUD completo](docs/screenshots/medicos.png)
+<img width="1919" height="942" alt="image" src="https://github.com/user-attachments/assets/f68cee89-278d-4434-99e4-8cf1ed555f7b" />
+<img width="1914" height="936" alt="image" src="https://github.com/user-attachments/assets/8981c090-b836-4cee-9161-00863faadfe0" />
+
+
 
 ---
 
 ### Gestión de Pacientes
 <!-- Listado, registro y edición de pacientes -->
-![Pacientes – CRUD completo](docs/screenshots/pacientes.png)
+<img width="1909" height="944" alt="image" src="https://github.com/user-attachments/assets/f48c2a38-39aa-4a71-82e7-e1046f93a75f" />
+<img width="1911" height="958" alt="image" src="https://github.com/user-attachments/assets/c36455c2-be3f-45c8-b76f-4653b8a183cc" />
+
+
 
 ---
 
 ### Consultas
 <!-- Reserva y cancelación de consultas médicas -->
-![Consultas – Reserva y cancelación](docs/screenshots/consultas.png)
+<img width="1912" height="943" alt="image" src="https://github.com/user-attachments/assets/9a30b953-55ae-4372-be53-ae8de4f03291" />
 
----
 
-> **Nota:** Para agregar tus propias capturas, crea la carpeta `docs/screenshots/` en la raíz del proyecto y reemplaza los archivos de imagen con los nombres indicados arriba.
 
 ---
 
@@ -657,7 +661,7 @@ java -jar target/api-0.0.1-SNAPSHOT.jar \
 ```
 
 ---
-
+*Los Datos Son Ficticios.
 ## 📐 Conceptos Clave Aprendidos en el Curso
 
 | Concepto | Dónde se aplica |
